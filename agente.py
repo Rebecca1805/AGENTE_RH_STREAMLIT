@@ -8,7 +8,7 @@ Original file is located at
 """
 
 from pathlib import Path
-from langchain_google_genai import ChatGoogleGenerativeAI, GoogleGenerativeAIEmbeddings
+from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain_community.vectorstores import FAISS
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.document_loaders import PyMuPDFLoader
@@ -45,14 +45,13 @@ def carregar_agente(folder_path="DADOS"):
     splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=100)
     splits = splitter.split_documents(docs)
 
-    embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
+    embeddings = OpenAIEmbeddings(model="text-embedding-3-small") 
     vectorstore = FAISS.from_documents(splits, embeddings)
     retriever = vectorstore.as_retriever()
 
-    llm = ChatGoogleGenerativeAI(
-    model="gemini-2.5-flash",
-    temperature=0.0,
-    api_key=GOOGLE_API_KEY
+    llm = ChatOpenAI(
+    model="gpt-4o-mini",  # barato, rápido e bom para testes
+    temperature=0.0
 )
 
     prompt = ChatPromptTemplate.from_messages([
