@@ -65,8 +65,12 @@ def carregar_agente(folder_path="DADOS"):
     chain = RetrievalQA.from_chain_type(
         llm=llm,
         retriever=retriever,
-        chain_type_kwargs={"prompt": prompt}
-    )
+        chain_type="stuff",
+        chain_type_kwargs={
+            "prompt": prompt,
+            "document_variable_name": "context"  # <- aqui está o pulo do gato
+        }
+)
     return chain
 
 
