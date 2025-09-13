@@ -14,19 +14,26 @@ st.write("Digite sua pergunta abaixo e eu responderei com base nos documentos fo
 # ----------------------------
 # Inicializa o agente (uma vez) e gerencia o estado da sessão
 # ----------------------------
-if "agente" not in st.session_state:
+# Usa o cache para evitar recarregar o agente em cada interação
+@st.cache_resource
+def get_agente():
     try:
-        # Tenta carregar o agente da pasta DADOS
+        # Verifica se a pasta e os PDFs existem antes de carregar
         if not os.path.exists("DADOS") or not any(Path("DADOS").glob("*.pdf")):
             st.error("❌ A pasta 'DADOS' não foi encontrada ou está vazia. Por favor, adicione os arquivos PDF.")
             st.stop()
         
-        st.session_state["agente"] = carregar_agente("DADOS")
-        st.success("✅ Agente inicializado com sucesso! PDFs carregados.")
+        agente_instance = carregar_agente("DADOS")
+        return agente_instance
         
     except Exception as e:
         st.error(f"❌ Erro ao carregar o agente: {e}")
         st.stop()
+
+# Carrega o agente e exibe um status
+agente_instance = get_agente()
+if agente_instance:
+    st.success("✅ Agente inicializado com sucesso! PDFs carregados.")
 
 # Inicializa o histórico de mensagens
 if "messages" not in st.session_state:
@@ -49,10 +56,10 @@ if pergunta := st.chat_input("Sua pergunta:"):
 
     # Gera a resposta com o agente
     with st.chat_message("assistant"):
-        with st.spinner("Buscando a resposta..."):
+        with st.spinner("Buscando a resposta nas políticas..."):
             try:
                 # Chama a função de resposta
-                resposta = responder_agente(st.session_state["agente"], pergunta)
+                resposta = responder_agente(agente_instance, pergunta)
                 
                 # Adiciona a resposta ao histórico e exibe
                 st.session_state.messages.append({"role": "assistant", "content": resposta})
