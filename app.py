@@ -4,9 +4,9 @@ from agente import carregar_agente, responder_agente
 # ----------------------------
 # Configuração da página
 # ----------------------------
-st.set_page_config(page_title="BECC Agent", page_icon="🤖")
+st.set_page_config(page_title="RoBECC Agente", page_icon="🤖")
 
-st.title("🤖 BECC Agent")
+st.title("🤖 RoBECC Agente")
 st.subheader("Assistente de Políticas Internas (RH/IT)")
 st.write("Digite sua pergunta abaixo e eu responderei com base nos documentos fornecidos.")
 
