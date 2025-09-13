@@ -33,7 +33,11 @@ if st.button("Enviar"):
     if pergunta.strip():
         try:
             resposta = responder_agente(st.session_state["agente"], pergunta)
+
+            # Agora o responder_agente retorna diretamente a resposta final
+            st.markdown("### 📝 Resposta")
             st.success(resposta)
+
         except Exception as e:
             st.error(f"Erro ao processar a pergunta: {e}")
     else:
