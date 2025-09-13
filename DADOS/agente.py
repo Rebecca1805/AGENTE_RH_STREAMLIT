@@ -71,17 +71,3 @@ def responder_agente(agente, pergunta: str) -> str:
     if isinstance(resposta, dict) and "result" in resposta:
         return resposta["result"]
     return str(resposta)
-
-# --- Interface Streamlit ---
-st.set_page_config(page_title="BECC Agent", page_icon="🤖")
-st.title("🤖 BECC Agent")
-st.write("Digite sua pergunta abaixo:")
-
-if "agente" not in st.session_state:
-    st.session_state["agente"] = carregar_agente("data")
-
-pergunta = st.text_input("Sua pergunta:")
-
-if st.button("Enviar"):
-    resposta = responder_agente(st.session_state["agente"], pergunta)
-    st.success(resposta)
