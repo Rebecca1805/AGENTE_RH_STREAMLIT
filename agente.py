@@ -58,7 +58,7 @@ def carregar_agente(folder_path="DADOS"):
         ("system", "Você é um Assistente de Políticas Internas (RH/IT). "
                    "Responda SOMENTE com base no contexto fornecido entre <<< >>>. "
                    "Se não houver base suficiente, responda apenas 'Não sei'.\n\nContexto: <<<{context}>>>"),
-        ("human", "{query}")
+        ("human", "{input}")
     ])
 
     chain = RetrievalQA.from_chain_type(
@@ -68,15 +68,14 @@ def carregar_agente(folder_path="DADOS"):
         chain_type_kwargs={
             "prompt": prompt,
             "document_variable_name": "context" 
-        },
-        input_key="query"
+        }
 )
     return chain
 
 
 def responder_agente(agente, pergunta: str) -> str:
     """Recebe uma pergunta e retorna a resposta do agente."""
-    resposta = agente.invoke({"query": pergunta})
+    resposta = agente.invoke({"input": pergunta})
     if isinstance(resposta, dict) and "result" in resposta:
         return resposta["result"]
     return str(resposta)
