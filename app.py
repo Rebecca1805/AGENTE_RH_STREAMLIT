@@ -7,7 +7,7 @@ from agente import carregar_agente, responder_agente
 st.set_page_config(page_title="BECC Agent", page_icon="🤖")
 
 st.title("🤖 BECC Agent")
-st.subheader("Assistente de Políticas Internas (RH/IT) - Carraro Desenvolvimento")
+st.subheader("Assistente de Políticas Internas (RH/IT)")
 st.write("Digite sua pergunta abaixo e eu responderei com base nos documentos fornecidos.")
 
 # ----------------------------
