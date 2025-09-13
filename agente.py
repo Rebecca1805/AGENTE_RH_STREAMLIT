@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """
 agente.py – Agente com 2 ramificações (responde ou pede mais detalhes)
-Agora configurado para usar OpenAI (gpt-4o-mini + text-embedding-3-small),
-com variáveis corrigidas para evitar erro de input/context/query.
+Versão estável usando OpenAI + FAISS com a API moderna do LangChain (create_stuff_documents_chain + create_retrieval_chain).
+Chaves e variáveis padronizadas para evitar erros de Missing input keys.
 """
 
 import asyncio
@@ -12,7 +12,8 @@ from langchain_community.vectorstores import FAISS
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.document_loaders import PyMuPDFLoader
 from langchain_core.prompts import ChatPromptTemplate
-from langchain.chains import RetrievalQA
+from langchain.chains.combine_documents import create_stuff_documents_chain
+from langchain.chains import create_retrieval_chain
 
 # Garante que o event loop exista no Streamlit
 try:
@@ -21,7 +22,7 @@ except RuntimeError:
     asyncio.set_event_loop(asyncio.new_event_loop())
 
 
-def carregar_documentos(folder_path="DADOS"):
+def carregar_documentos(folder_path: str = "DADOS"):
     """Carrega todos os PDFs da pasta fornecida e retorna lista de documentos."""
     docs = []
     for n in Path(folder_path).glob("*.pdf"):
@@ -35,8 +36,16 @@ def carregar_documentos(folder_path="DADOS"):
     return docs
 
 
-def carregar_agente(folder_path="DADOS"):
-    """Inicializa o agente baseado nos documentos PDF da pasta especificada."""
+def carregar_agente(folder_path: str = "DADOS"):
+    """
+    Inicializa o agente baseado nos documentos PDF da pasta especificada.
+    Pipeline:
+      PDFs -> chunks -> embeddings (OpenAI) -> FAISS -> retriever -> chain (stuff)
+    Entradas/Saídas do chain:
+      input: pergunta do usuário
+      context: documentos recuperados (injetados no prompt)
+      answer: resposta final
+    """
     docs = carregar_documentos(folder_path)
     if not docs:
         raise ValueError("Nenhum documento PDF encontrado na pasta DADOS/")
@@ -48,36 +57,34 @@ def carregar_agente(folder_path="DADOS"):
     vectorstore = FAISS.from_documents(splits, embeddings)
     retriever = vectorstore.as_retriever()
 
-    llm = ChatOpenAI(
-        model="gpt-4o-mini",  # rápido e econômico
-        temperature=0.0
-    )
+    llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.0)
 
-    # 🔑 Atenção: usamos {query} para alinhar com RetrievalQA
+    # Prompt padronizado: usa 'context' para docs e 'input' para a pergunta
     prompt = ChatPromptTemplate.from_messages([
         ("system",
          "Você é um Assistente de Políticas Internas (RH/IT). "
          "Responda SOMENTE com base no contexto fornecido entre <<< >>>. "
          "Se não houver base suficiente, responda apenas 'Não sei'.\n\nContexto: <<<{context}>>>"),
-        ("human", "{query}")
+        ("human", "{input}")
     ])
 
-    chain = RetrievalQA.from_chain_type(
-        llm=llm,
-        retriever=retriever,
-        chain_type="stuff",
-        chain_type_kwargs={
-            "prompt": prompt,
-            "document_variable_name": "context"
-        },
-        input_key="query"   # 👈 chave de entrada oficial
-    )
+    # Cria a corrente de 'stuff' que junta docs + prompt
+    docs_chain = create_stuff_documents_chain(llm, prompt)
+
+    # Cria o chain de recuperação (retriever -> docs_chain)
+    chain = create_retrieval_chain(retriever, docs_chain)
+
     return chain
 
 
 def responder_agente(agente, pergunta: str) -> str:
     """Recebe uma pergunta e retorna a resposta do agente."""
-    resposta = agente.invoke({"query": pergunta})
-    if isinstance(resposta, dict) and "result" in resposta:
-        return resposta["result"]
-    return str(resposta)
+    # Aqui o chain criado por create_retrieval_chain espera a chave 'input'
+    resp = agente.invoke({"input": pergunta})
+    # Ele normalmente retorna {'input': ..., 'context': [...], 'answer': '...'}
+    if isinstance(resp, dict):
+        if "answer" in resp:
+            return resp["answer"]
+        if "result" in resp:
+            return resp["result"]
+    return str(resp)
