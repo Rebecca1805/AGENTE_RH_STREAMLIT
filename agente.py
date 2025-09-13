@@ -15,6 +15,12 @@ from langchain_community.document_loaders import PyMuPDFLoader
 from langchain_core.prompts import ChatPromptTemplate
 from langchain.chains import RetrievalQA
 
+import asyncio
+
+try:
+    asyncio.get_running_loop()
+except RuntimeError:
+    asyncio.set_event_loop(asyncio.new_event_loop())
 
 def carregar_documentos(folder_path="DADOS"):
     """Carrega todos os PDFs da pasta fornecida e retorna lista de documentos."""
