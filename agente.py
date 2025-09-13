@@ -16,7 +16,7 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain.chains import RetrievalQA
 
 
-def carregar_documentos(folder_path="data"):
+def carregar_documentos(folder_path="DADOS"):
     """Carrega todos os PDFs da pasta fornecida e retorna lista de documentos."""
     docs = []
     for n in Path(folder_path).glob("*.pdf"):
@@ -30,13 +30,13 @@ def carregar_documentos(folder_path="data"):
     return docs
 
 
-def carregar_agente(folder_path="data"):
+def carregar_agente(folder_path="DADOS"):
     """Inicializa o agente baseado nos documentos PDF da pasta especificada."""
     docs = carregar_documentos(folder_path)
     if not docs:
         raise ValueError("Nenhum documento PDF encontrado na pasta data/")
 
-    splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
+    splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=100)
     splits = splitter.split_documents(docs)
 
     embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
