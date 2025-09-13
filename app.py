@@ -1,29 +1,40 @@
 import streamlit as st
+from agente import carregar_agente, responder_agente
 
-# Função simples do agente (2 ramificações)
-def agente_resposta(pergunta: str):
-    conhecimento = {
-        "horário de atendimento": "Nosso horário é de segunda a sexta, das 9h às 18h.",
-        "produtos": "Oferecemos soluções de automação inteligente com IA."
-    }
-
-    for chave, resposta in conhecimento.items():
-        if chave in pergunta.lower():
-            return resposta
-    
-    return "Não tenho certeza sobre isso. Pode me dar mais detalhes?"
-
+# ----------------------------
 # Configuração da página
-st.set_page_config(page_title="Agente BECC", page_icon="🤖")
+# ----------------------------
+st.set_page_config(page_title="BECC Agent", page_icon="🤖")
 
-st.title("🤖 Olá, sou seu agente BECC!")
-st.write("Em que posso te ajudar hoje?")
+st.title("🤖 BECC Agent")
+st.subheader("Assistente de Políticas Internas (RH/IT) - Carraro Desenvolvimento")
+st.write("Digite sua pergunta abaixo e eu responderei com base nos documentos fornecidos.")
 
-pergunta = st.text_input("Digite sua intenção:")
+# ----------------------------
+# Inicializa o agente (uma vez)
+# ----------------------------
+if "agente" not in st.session_state:
+    try:
+        st.session_state["agente"] = carregar_agente("DADOS")
+        st.success("✅ Agente inicializado com sucesso! PDFs carregados.")
+    except Exception as e:
+        st.error(f"Erro ao carregar o agente: {e}")
+        st.stop()
 
+# ----------------------------
+# Campo de input do usuário
+# ----------------------------
+pergunta = st.text_input("Sua pergunta:")
+
+# ----------------------------
+# Botão de envio
+# ----------------------------
 if st.button("Enviar"):
     if pergunta.strip():
-        resposta = agente_resposta(pergunta)
-        st.success(resposta)
+        try:
+            resposta = responder_agente(st.session_state["agente"], pergunta)
+            st.success(resposta)
+        except Exception as e:
+            st.error(f"Erro ao processar a pergunta: {e}")
     else:
         st.warning("Por favor, digite uma pergunta.")
