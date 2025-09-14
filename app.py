@@ -1,5 +1,6 @@
 import streamlit as st
 import os
+from pathlib import Path
 from agente import carregar_agente, responder_agente
 
 # ----------------------------
