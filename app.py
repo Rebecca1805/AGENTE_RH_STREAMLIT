@@ -34,7 +34,7 @@ def get_agente():
 # Carrega o agente e exibe um status
 agente_instance = get_agente()
 if agente_instance:
-    st.success("✅ Agente inicializado com sucesso! PDFs carregados.")
+    st.success("✅ Agente inicializada com sucesso!")
 
 # Inicializa o histórico de mensagens
 if "messages" not in st.session_state:
