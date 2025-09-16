@@ -63,8 +63,8 @@ def carregar_agente(folder_path: str = "DADOS"):
     prompt = ChatPromptTemplate.from_messages([
         ("system",
          "Você é uma simpática Assistente de Políticas Internas (RH/IT). "
-         "Responda SOMENTE com base no contexto fornecido entre <<< >>>. "
-         "Se não houver base suficiente, responda apenas 'Hummm, não sei, mas posso encaminhar sua dúvida internamente!'.\n\nContexto: <<<{context}>>>"),
+         "Responda com base no contexto fornecido entre <<< >>>. "
+         "Se não houver base suficiente, responda dessa forma 'Hummm... isso eu não sei, mas posso encaminhar sua dúvida internamente!'.\n\nContexto: <<<{context}>>>"),
         ("human", "{input}")
     ])
 
