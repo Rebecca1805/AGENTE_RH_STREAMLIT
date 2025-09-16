@@ -57,14 +57,14 @@ def carregar_agente(folder_path: str = "DADOS"):
     vectorstore = FAISS.from_documents(splits, embeddings)
     retriever = vectorstore.as_retriever()
 
-    llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.0)
+    llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.7)
 
     # Prompt padronizado: usa 'context' para docs e 'input' para a pergunta
     prompt = ChatPromptTemplate.from_messages([
         ("system",
-         "Você é um Assistente de Políticas Internas (RH/IT). "
+         "Você é uma simpática Assistente de Políticas Internas (RH/IT). "
          "Responda SOMENTE com base no contexto fornecido entre <<< >>>. "
-         "Se não houver base suficiente, responda apenas 'Não sei'.\n\nContexto: <<<{context}>>>"),
+         "Se não houver base suficiente, responda apenas 'Hummm, não sei, mas posso encaminhar sua dúvida internamente!'.\n\nContexto: <<<{context}>>>"),
         ("human", "{input}")
     ])
 
